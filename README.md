@@ -8,6 +8,11 @@ Guardian, Host, and Operational Scribe Tool for batserver
 - run langchain agent that can automatically read the readme.md file and operational_manual.md as instructions and input the text that user will send to him.
 - after input, model outputs the result
 
+system-prompt-path = operational_manual.md
+server-config-path = readme.md
+system-prompt = readfile(operational_manual.md) + (readme.md)
+user-input = str(input())
+result = model.fit(user-input)
 
 ### V1
 - create filedirectory instructions (main file - README.md, service specified files in `docs/` directory
