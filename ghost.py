@@ -11,6 +11,11 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage, SystemMessage
 import subprocess
+import logging
+import json
+
+# logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 config_dir = os.getenv("SERVER_DIR")
@@ -53,6 +58,34 @@ def edit_file_content(filepath: str, old_text: str, new_text: str, encoding: str
     except Exception as e:
         print(f"Error editing {filepath}: {e}")
         return False
+
+def edit_file_multiple(
+    filepath: str,
+    json: dict,
+    encoding: str = "utf-8",
+) -> bool:
+    file_path = Path(filepath)
+    if not file_path.exists():
+        logger.error(f"File not found: {file_path}")
+        return False
+    try:
+        # READ ONCE
+        content = file_path.read_text(encoding=encoding)    
+
+        for edit in json["edits"]:
+            if edit["old"] not in content:
+                logger.error(f"Text not found: {edit['old']}")
+                continue
+            content = content.replace(edit["old"], edit["new"])
+            logger.info(f"{edit['old']} -> {edit['new']}")
+
+        file_path.write_text(content, encoding=encoding)
+        logger.info(f"Successfully updated {file_path}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update {filepath}: {e}")
+        return False
+
 
 def main():
     # Load environment variables from .env file
@@ -132,20 +165,23 @@ def main():
     print("=" * 60 + "\n")
     
     try:
-        response = llm.invoke(messages)
-        result = response.content
+        response = llm.invoke(messages).content
+        print(response)
+        result = json.loads(response)
+        print(result)
 
         # print(result)
 
-        # split result into old_text and new_text
-        old_text = result.split("old_text: ")[1].split("new_text: ")[0]
-        new_text = result.split("new_text: ")[1]
+        # # split result into old_text and new_text
+        # old_text = result.split("old_text: ")[1].split("new_text: ")[0]
+        # new_text = result.split("new_text: ")[1]
 
-        print(f"old_text: {old_text}")
-        print(f"new_text: {new_text}")
-        print("-" * 60 + "\n")
+        # print(f"old_text: {old_text}")
+        # print(f"new_text: {new_text}")
+        # print("-" * 60 + "\n")
         
-        edit_file_content(readme_path, old_text, new_text)
+        # edit_file_content(readme_path, old_text, new_text)
+        edit_file_multiple(readme_path, result)
         print("README.md updated successfully")
         print("=" * 60 + "\n")
 
