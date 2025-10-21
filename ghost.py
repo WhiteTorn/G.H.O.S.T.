@@ -37,6 +37,23 @@ def write_file_content(filepath: str, content: str) -> bool:
         print(f"Error writing to {filepath}: {e}")
         return False
 
+def edit_file_content(filepath: str, old_text: str, new_text: str, encoding: str = "utf-8") -> bool:
+    file_path = Path(filepath)
+    if not file_path.exists():
+        print(f"Error: File not found - {file_path}")
+        return False
+    try:
+        content = file_path.read_text(encoding=encoding)
+        if old_text not in content:
+            print(f"Error: Text not found - {old_text}")
+            return False
+        updated_content = content.replace(old_text, new_text)
+        file_path.write_text(updated_content, encoding=encoding)
+        return True
+    except Exception as e:
+        print(f"Error editing {filepath}: {e}")
+        return False
+
 def main():
     # Load environment variables from .env file
     load_dotenv()
@@ -50,7 +67,7 @@ def main():
     
     # Set up paths
     base_dir = Path(__file__).parent
-    operational_manual_path = base_dir / "OPERATIONAL_MANUAL.md"
+    operational_manual_path = base_dir / "OPERATIONAL_MANUAL_EDIT.md"
     os.chdir(config_dir)
     readme_path = "README.md"
     
@@ -117,8 +134,18 @@ def main():
     try:
         response = llm.invoke(messages)
         result = response.content
+
+        # print(result)
+
+        # split result into old_text and new_text
+        old_text = result.split("old_text: ")[1].split("new_text: ")[0]
+        new_text = result.split("new_text: ")[1]
+
+        print(f"old_text: {old_text}")
+        print(f"new_text: {new_text}")
+        print("-" * 60 + "\n")
         
-        write_file_content(readme_path, result)
+        edit_file_content(readme_path, old_text, new_text)
         print("README.md updated successfully")
         print("=" * 60 + "\n")
 
