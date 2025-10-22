@@ -178,54 +178,63 @@ def main():
         # Ask for confirmation
         apply_choice = input("\nApply these changes? (y/n) > ").strip().lower()
 
-        if apply_choice in ['y', 'yes']:
-            edit_file_multiple(readme_path, result)
-            print("README.md updated successfully")
-            print("=" * 60 + "\n")
+        
+        edit_file_multiple(readme_path, result)
+        print("README.md updated successfully")
+        print("=" * 60 + "\n")
 
-            diff = subprocess.run(["git", "diff", readme_path], capture_output=True, text=True)
-            print("Differences:")
-            print(diff.stdout)
+        diff = subprocess.run(["git", "diff", readme_path], capture_output=True, text=True)
+        print("Differences:")
+        print(diff.stdout)
 
-            # Commit choice
-            commit_choice = input("\nDo you want to commit the changes? (y/n) > ").strip().lower()
+        # Ask to keep or revert
+        keep_choice = input("\nKeep these changes? (y/n) > ").strip().lower()
 
-            if commit_choice in ['y', 'yes']:
-
-                commit_message = input("\nEnter the commit message > ").strip()
-                if not commit_message:
-                    print("Error: Commit message cannot be empty")
-                    return
-
-                # git add .
-                add_result = subprocess.run(["git", "add", "."], capture_output=True, text=True)
-                if add_result.returncode != 0:
-                    print(f"Error adding changes: {add_result.stderr}")
-                    print(add_result.stderr)
-                    return
-                
-                # git commit -m "{user_input}"
-                commit_result =subprocess.run(["git", "commit", "-m", commit_message], capture_output=True, text=True)
-                if commit_result.returncode != 0:
-                    print(f"Error committing changes: {commit_result.stderr}")
-                    print(commit_result.stderr)
-                    return
-
-                print("\n✓ Changes committed successfully!")
-
-                # git status
-                status = subprocess.run(["git", "status"], capture_output=True, text=True)
-                print(status.stdout)
-
-                print("Changes Commited, Exiting...")
-                return
-
-            else:
-                print("Changes not committed, Exiting...")
-                return
-        else:
-            print("✗ Changes cancelled.")
+        if keep_choice not in ['y', 'yes']:
+            # Revert the file
+            subprocess.run(["git", "checkout", readme_path])
+            print("✗ Changes reverted.")
             return
+
+        print("✓ Changes kept!")
+
+        # Commit choice
+        commit_choice = input("\nDo you want to commit the changes? (y/n) > ").strip().lower()
+
+        if commit_choice in ['y', 'yes']:
+
+            commit_message = input("\nEnter the commit message > ").strip()
+            if not commit_message:
+                print("Error: Commit message cannot be empty")
+                return
+
+            # git add .
+            add_result = subprocess.run(["git", "add", "."], capture_output=True, text=True)
+            if add_result.returncode != 0:
+                print(f"Error adding changes: {add_result.stderr}")
+                print(add_result.stderr)
+                return
+            
+            # git commit -m "{user_input}"
+            commit_result =subprocess.run(["git", "commit", "-m", commit_message], capture_output=True, text=True)
+            if commit_result.returncode != 0:
+                print(f"Error committing changes: {commit_result.stderr}")
+                print(commit_result.stderr)
+                return
+
+            print("\n✓ Changes committed successfully!")
+
+            # git status
+            status = subprocess.run(["git", "status"], capture_output=True, text=True)
+            print(status.stdout)
+
+            print("Changes Commited, Exiting...")
+            return
+
+        else:
+            print("Changes not committed, Exiting...")
+            return
+        
 
         
         
