@@ -166,21 +166,10 @@ def main():
     
     try:
         response = llm.invoke(messages).content
-        print(response)
+        # print(response)
         result = json.loads(response)
-        print(result)
-
         # print(result)
 
-        # # split result into old_text and new_text
-        # old_text = result.split("old_text: ")[1].split("new_text: ")[0]
-        # new_text = result.split("new_text: ")[1]
-
-        # print(f"old_text: {old_text}")
-        # print(f"new_text: {new_text}")
-        # print("-" * 60 + "\n")
-        
-        # edit_file_content(readme_path, old_text, new_text)
         edit_file_multiple(readme_path, result)
         print("README.md updated successfully")
         print("=" * 60 + "\n")
