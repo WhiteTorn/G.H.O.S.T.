@@ -175,10 +175,6 @@ def main():
         print(response)
         print("-" * 60)
 
-        # Ask for confirmation
-        apply_choice = input("\nApply these changes? (y/n) > ").strip().lower()
-
-        
         edit_file_multiple(readme_path, result)
         print("README.md updated successfully")
         print("=" * 60 + "\n")
